@@ -1,7 +1,3 @@
-Here's a professional and visually appealing `README.md` for your mini Python package:
-
----
-
 # 📈 `statioPy` - Time Series Stationarity Toolkit
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
