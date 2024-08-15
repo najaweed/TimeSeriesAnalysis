@@ -3,8 +3,8 @@
 ## single variate methods : 
     - Dynamic Mode Decomposition
     - Empirical Mode Decomposition
-    - Spectral Decomposition
-    
+    - Variational Mode Decomposition
+
 ## multi variate methods :
     - Multi-Variate EMD and DMD
     - Multi-Variate and Constrained 
