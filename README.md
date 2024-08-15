@@ -1,4 +1,4 @@
-# 📈 `statioPy` - Time Series Stationarity Toolkit
+# 📈 `statioPy` - Time Series Stationary Toolkit
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
