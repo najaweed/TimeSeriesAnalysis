@@ -3,7 +3,7 @@
 ## single variate methods : 
     - Dynamic Mode Decomposition
     - Empirical Mode Decomposition
-    - Variational Mode Decomposition
+    - Seasonal-Cycle-Trend decomposition
 
 ## multi variate methods :
     - Multi-Variate EMD and DMD
