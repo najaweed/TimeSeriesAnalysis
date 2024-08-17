@@ -1,11 +1,11 @@
 # Tests for Non-Stationarity 
-    strict stationarity is satisfied when its distribution over time is constant
+    a time series is strict stationarity when its distribution over time is constant.
     weak stationarity
         - constant mean  
         - constant variance 
         - constant auto-co-variance 
         - constant moments  
-        
+
     ## Trend Stationary Tests
 
         - Unit Root Tests
