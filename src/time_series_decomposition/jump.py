@@ -51,6 +51,8 @@ class FindJump:
             else:
                 i += 1  # Increment by 1 if no jump is detected
         return jump_dict
+    
+
 
 
 # import matplotlib.pyplot as plt
