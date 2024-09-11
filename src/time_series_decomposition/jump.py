@@ -8,8 +8,9 @@ class FindJump:
                 window_size:int = 16,
                 ):
         self.time_series = self._normalize(time_series)
-        self.window_size = window_size 
-        
+        self.window_size = window_size
+        self.jumps = self.jump_detection() 
+
     @staticmethod    
     def rolling_mean_std(time_series: np.ndarray, span_window=10):
         ewm = pd.Series(time_series).ewm(span=span_window, adjust=False)
@@ -52,6 +53,25 @@ class FindJump:
                 i += 1  # Increment by 1 if no jump is detected
         return jump_dict
 
+    def transform_jumps(self):
+        index_jumps = list(self.jumps)
+        print(np.mean(self.time_series[index_jumps[0]-10:index_jumps[0]]))
+        print(np.mean(self.time_series[index_jumps[0]:index_jumps[0]+10]))
+
+        pass
+
+    @staticmethod
+    def fit_line(data: np.ndarray) -> np.ndarray:
+        """
+        Fits a straight line to the given 1D time series data.
+        """
+        n = data.size
+        x = np.arange(n)
+        # Solve for the best fit line y = mx + b using least squares
+        A = np.vstack([x, np.ones(n)]).T
+        m, b = np.linalg.lstsq(A, data, rcond=None)[0]
+        
+        return np.array(m * x + b)
 
 # import matplotlib.pyplot as plt
 # import stochastic.processes as sto 
