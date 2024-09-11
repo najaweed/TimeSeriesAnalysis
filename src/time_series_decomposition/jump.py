@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-
 class FindJump:
     def __init__(self,
                 time_series:np.ndarray,
@@ -10,7 +9,8 @@ class FindJump:
         self.time_series = self._normalize(time_series)
         self.window_size = window_size
         self.jumps = self.jump_detection() 
-
+        self.jump_free_time_series,  self.heights = self.transform_jumps()
+        
     @staticmethod    
     def rolling_mean_std(time_series: np.ndarray, span_window=10):
         ewm = pd.Series(time_series).ewm(span=span_window, adjust=False)
@@ -32,10 +32,12 @@ class FindJump:
             return True
         else:
             return False
-    
-    def _normalize(self,time_series:np.ndarray) -> np.ndarray:
+    @staticmethod
+    def _normalize(time_series:np.ndarray) -> np.ndarray:
         time_series -= np.min(time_series)
-        time_series /= np.max(time_series) - np.min(time_series)
+        max_min = np.max(time_series) - np.min(time_series)
+        max_min = max_min if max_min !=0 else 1
+        time_series /= max_min
         return time_series
 
         
@@ -55,11 +57,35 @@ class FindJump:
 
     def transform_jumps(self):
         index_jumps = list(self.jumps)
-        print(np.mean(self.time_series[index_jumps[0]-10:index_jumps[0]]))
-        print(np.mean(self.time_series[index_jumps[0]:index_jumps[0]+10]))
+        time_series = self.time_series.copy()
+        height_jumps = {} 
+        for index_jump in index_jumps:
+            back_index = 2 # is there any way to find the exact ? that's fine 
+            mean_before_jump = np.mean(time_series[index_jump-self.window_size:index_jump-back_index])
+            mean_after_jump = np.mean(time_series[index_jump:index_jump+self.window_size])
+            height_jump = mean_after_jump - mean_before_jump 
+            height_jumps[index_jump] =  height_jump
+            time_series[:index_jump-back_index] += height_jump
 
-        pass
+        return time_series, height_jumps
 
+    def inverse_jump_transform(self,free_jump_time_series):
+        inv_ts = free_jump_time_series
+        for index_jump, height_jump in self.heights.items():
+            back_index = 2
+            inv_ts[:index_jump-back_index] -= height_jump
+        return inv_ts   
+
+
+
+class TrendTransform:
+    def __init__(self,
+                time_series:np.ndarray,
+                ):
+        self.time_series = time_series
+        self.trend_line = self.fit_line(time_series)
+        
+    
     @staticmethod
     def fit_line(data: np.ndarray) -> np.ndarray:
         """
@@ -73,16 +99,47 @@ class FindJump:
         
         return np.array(m * x + b)
 
-# import matplotlib.pyplot as plt
-# import stochastic.processes as sto 
-# fbm = sto.CauchyProcess()
-# ts = fbm.sample(1000)
-# #times = fbm.times(1000)
-# df = pd.DataFrame(ts, columns=['Value'])
-
-# findJump= FindJump(ts,window_size=32)
-# jumps=findJump.jump_detection()
-# for key , val in jumps.items():
-#     plt.scatter(x=key,y=val)
-# plt.plot(findJump.time_series)
-# plt.show()
+class TrendJumpTransform:
+    def __init__(self,
+                 time_series:np.ndarray,
+                 window_size:int=32
+                 ):
+        self.time_series = self._normalize(time_series)
+        self.window_size = window_size
+    
+    @staticmethod
+    def fit_line(data: np.ndarray) -> np.ndarray:
+        """
+        Fits a straight line to the given 1D time series data.
+        """
+        n = data.size
+        x = np.arange(n)
+        # Solve for the best fit line y = mx + b using least squares
+        A = np.vstack([x, np.ones(n)]).T
+        m, b = np.linalg.lstsq(A, data, rcond=None)[0]
+        
+        return np.array(m * x + b)
+    
+    @staticmethod    
+    def _normalize(time_series:np.ndarray) -> np.ndarray:
+        time_series -= np.min(time_series)
+        max_min = np.max(time_series) - np.min(time_series)
+        max_min = max_min if max_min !=0 else 1
+        time_series /= max_min
+        return time_series
+    
+    def trend_jump_transform(self):
+        time_series = self.time_series.copy()
+        jump_free_time_series = FindJump(time_series,self.window_size).jump_free_time_series
+        jump_free_trend_line = self.fit_line(jump_free_time_series)
+        jump_trend_free_time_series = jump_free_time_series - jump_free_trend_line
+        
+        import matplotlib.pyplot as plt
+        plt.figure("aa")
+        plt.plot(TrendTransform(time_series).trend_line)
+        plt.plot(time_series)
+        plt.figure("bb")
+        plt.plot(jump_free_trend_line)
+        plt.plot(jump_free_time_series)
+        
+        return jump_trend_free_time_series
